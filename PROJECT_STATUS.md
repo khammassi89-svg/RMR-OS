@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.1
+v0.8.0
 
 ---
 
@@ -30,6 +30,7 @@ The core architecture, specifications, data models, and the first production det
 - TS-001
 - CFG-001
 - ENG-001
+- ENG-002
 
 ### Data Models
 
@@ -75,16 +76,21 @@ RawFVG List
 
 ## Next Sprint
 
-v0.8.0
+v0.9.0
 
-CFG-001 Configuration Loader
+TS-001 Primary Target Selection
+
+---
+
+## Deferred
+
+- ENG-002 Configuration Loader implementation is deferred until TS-001 requires configuration loading.
 
 ---
 
 ## Long-Term Roadmap
 
-- CFG-001 Configuration Loader
-- TS-001 Primary Target Selection
+- ENG-002 Configuration Loader Implementation
 - Recursive Refinement
 - Manipulation Detection
 - Cluster Engine

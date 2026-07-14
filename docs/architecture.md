@@ -85,6 +85,8 @@ Contains every official rule used by RMR.
 
 Detects all approved technical structures.
 
+Produces immutable detection objects that are consumed by later processing modules.
+
 Examples:
 
 - Daily FVG
@@ -92,6 +94,18 @@ Examples:
 - BIW
 - Inside Bar
 - Order Block
+
+---
+
+## Touch Detection Engine
+
+Classifies detected structures as Tested or Untested.
+
+Consumes immutable detection objects.
+
+Produces immutable classified objects for downstream decision modules.
+
+Performs no detection and no target selection.
 
 ---
 
