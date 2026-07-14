@@ -48,9 +48,9 @@ DR-001
 
 2. Locate Candle C using RawFVG.end_time.
 
-3. Scan every candle after Candle C.
+3. Scan every candle after Candle C in the supplied chronological Daily OHLC series.
 
-4. Compare the candle wick against the gap boundaries.
+4. Compare Candle.high and Candle.low against the Fair Value Gap boundaries as defined by TM-001.
 
 5. If a touch is detected, return Tested.
 
@@ -60,11 +60,12 @@ DR-001
 
 # Output
 
-Tested
+TouchStatus
 
-or
+Values
 
-Untested
+- TESTED
+- UNTESTED
 
 ---
 
@@ -89,3 +90,9 @@ Does not:
 - Calculate distances
 - Apply lookback filtering
 - Execute trades
+
+# Implementation Module
+
+rmr/engines/touch_detection.py
+
+---
