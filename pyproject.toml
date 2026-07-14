@@ -1,0 +1,31 @@
+[project]
+name = "rmr-os"
+version = "0.6.0"
+description = "Recursive Manipulation Refinement Operating System"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Ramzi Khammassi" }
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
