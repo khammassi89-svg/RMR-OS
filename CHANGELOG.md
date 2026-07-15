@@ -1,5 +1,32 @@
 # Changelog
 
+All notable changes to the RMR-OS project will be documented in this file.
+
+The format follows Semantic Versioning:
+
+- MAJOR.MINOR.PATCH
+
+---
+
+# v0.8.0
+
+## Added
+
+- Implemented TM-001 Touch Detection.
+- Added ENG-003 Touch Detection Engine.
+- Added TouchStatus classification.
+- Added comprehensive TM-001 unit tests.
+
+## Architecture
+
+- DR-001 remains a pure detector.
+- RawFVG remains immutable.
+- Touch detection is fully owned by TM-001.
+
+## Testing
+
+- 156 automated tests passing.
+
 ## v0.3.2 - Target Selection Clarifications
 
 ### Changed
@@ -32,14 +59,6 @@ The format follows Semantic Versioning:
 
 ---
 
-## v0.3.0 - Target Selection Specifications
-
-### Added
-
-- TS-001 — Primary Target Zone (PTZ) Selection
-- DR-001 — Daily Fair Value Gap Detection
-- CFG-001 — Primary Target Zone Configuration
-- ENG-001 — Target Selection Engine Specification
 
 ### Repository
 

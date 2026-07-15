@@ -8,13 +8,21 @@ v0.8.0
 
 ## Current Phase
 
-Foundation Complete
+Core Engine Foundation Complete
 
-The core architecture, specifications, data models, and the first production detector have been implemented and verified.
+The core architecture, specifications, data models, detection engine, and touch detection engine have been implemented and verified.
 
 ---
 
 ## Completed Modules
+
+- DR-001
+- TM-001
+- TS-001
+- CFG-001
+- ENG-001
+- ENG-002
+- ENG-003
 
 ### Documentation
 
@@ -41,6 +49,10 @@ The core architecture, specifications, data models, and the first production det
 
 - DR-001 Daily FVG Detector
 
+### Engines
+
+- ENG-003 Touch Detection Engine
+
 ### Infrastructure
 
 - pyproject.toml
@@ -56,7 +68,7 @@ The core architecture, specifications, data models, and the first production det
 
 Current automated tests:
 
-**All passing**
+156 tests passing
 
 ---
 
@@ -71,6 +83,14 @@ DR-001 Detector
 ↓
 
 RawFVG List
+
+↓
+
+TM-001 Touch Detection
+
+↓
+
+TouchStatus
 
 ---
 
