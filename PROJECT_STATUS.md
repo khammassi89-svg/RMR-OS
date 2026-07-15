@@ -14,7 +14,23 @@ The core architecture, specifications, data models, detection engine, and touch 
 
 ---
 
-## Completed Modules
+## Implemented Modules
+
+### Data Models
+
+- Candle
+- RawFVG
+
+### Detection
+
+- DR-001 Daily FVG Detector
+
+### Touch Detection
+
+- TM-001 Touch Detection
+- ENG-003 Touch Detection Engine
+
+## Approved Specifications
 
 - DR-001
 - TM-001

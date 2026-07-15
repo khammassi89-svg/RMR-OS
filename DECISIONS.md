@@ -107,3 +107,27 @@ Every implementation follows:
 Reason:
 
 Ensures deterministic, specification-driven development.
+
+## ADR-006
+
+### Title
+
+Touch Detection Ownership
+
+### Status
+
+Accepted
+
+### Decision
+
+Touch detection is no longer part of TS-001.
+
+A dedicated business rule (TM-001) and engine (ENG-003) own the determination of Tested and Untested Daily Fair Value Gaps.
+
+TS-001 consumes the classification produced by TM-001 and is responsible only for Primary Target Zone (PTZ) selection.
+
+### Rationale
+
+Separating touch detection from target selection follows the single responsibility principle defined in the Constitution.
+
+This improves modularity, testability, determinism, and allows touch detection to be reused by future engines.
