@@ -2,19 +2,39 @@
 
 ## Current Version
 
-v0.8.0
+v0.9.0
 
 ---
 
 ## Current Phase
 
-Core Engine Foundation Complete
+Specification Freeze Complete
 
-The core architecture, specifications, data models, detection engine, and touch detection engine have been implemented and verified.
+The core specification architecture has been finalized and approved.
+
+Implementation of the business rules is now beginning.
 
 ---
 
-## Implemented Modules
+## Approved Specifications
+
+### Core Specifications
+
+- DS-001 Market Data Specification
+- DR-001 Daily Fair Value Gap Detection
+- TM-001 Touch Detection
+- TS-001 Primary Target Zone Selection
+- CFG-001 Primary Target Zone Configuration
+
+### Engineering Specifications
+
+- ENG-001
+- ENG-002
+- ENG-003
+
+---
+
+## Implemented Components
 
 ### Data Models
 
@@ -30,17 +50,9 @@ The core architecture, specifications, data models, detection engine, and touch 
 - TM-001 Touch Detection
 - ENG-003 Touch Detection Engine
 
-## Approved Specifications
+---
 
-- DR-001
-- TM-001
-- TS-001
-- CFG-001
-- ENG-001
-- ENG-002
-- ENG-003
-
-### Documentation
+## Documentation
 
 - Constitution
 - Architecture
@@ -48,34 +60,15 @@ The core architecture, specifications, data models, detection engine, and touch 
 - DECISIONS
 - PROJECT_STATUS
 
-### Specifications
+---
 
-- DR-001
-- TS-001
-- CFG-001
-- ENG-001
-- ENG-002
-
-### Data Models
-
-- Candle
-- RawFVG
-
-### Detectors
-
-- DR-001 Daily FVG Detector
-
-### Engines
-
-- ENG-003 Touch Detection Engine
-
-### Infrastructure
+## Infrastructure
 
 - pyproject.toml
 - pytest
 - Ruff
 - mypy
-- GitHub repository
+- GitHub Repository
 - GitHub Releases
 
 ---
@@ -110,26 +103,28 @@ TouchStatus
 
 ---
 
-## Next Sprint
+## Current Sprint
 
-v0.9.0
+TS-001 Primary Target Selection Engine Implementation
 
-TS-001 Primary Target Selection
+Python Module:
+
+rmr/engines/target_selection.py
 
 ---
 
 ## Deferred
 
-- ENG-002 Configuration Loader implementation is deferred until TS-001 requires configuration loading.
+- ENG-002 Configuration Loader implementation until required by TS-001 runtime.
 
 ---
 
 ## Long-Term Roadmap
 
-- ENG-002 Configuration Loader Implementation
-- Recursive Refinement
-- Manipulation Detection
-- Cluster Engine
+- HTF Analysis Engine
+- Recursive Manipulation Refinement
+- Point of Interest (POI) Engine
+- Orchestration Engine
 - Entry Engine
 - Money Management
 - Learning Engine
@@ -137,10 +132,14 @@ TS-001 Primary Target Selection
 
 ---
 
-Status:
+## Status
 
-Project is healthy.
+✔ Specification architecture frozen.
 
-Architecture stable.
+✔ Core business rules approved.
 
-Ready for continued development.
+✔ Detection and Touch Detection implemented and verified.
+
+✔ 156 automated tests passing.
+
+✔ Ready for TS-001 implementation.
