@@ -30,9 +30,6 @@ class Window:
 def detect_candidates(daily_candles: list[Candle]) -> list[RawFVG]:
     """
     Detect all Daily Fair Value Gap candidates using DR-001.
-
-    This helper delegates detection entirely to the DR-001 detector.
-    It performs no filtering or additional processing.
     """
     return detect_daily_fvgs(daily_candles)
 
@@ -40,10 +37,6 @@ def detect_candidates(daily_candles: list[Candle]) -> list[RawFVG]:
 def resolve_anchor(daily_candles: list[Candle]) -> Candle:
     """
     Return the latest completed Daily candle.
-
-    Per DS-001, the supplied candle series is already guaranteed to
-    contain completed candles in strict chronological order.
-    Therefore, the anchor is simply the final candle.
     """
     return daily_candles[-1]
 
@@ -62,6 +55,17 @@ def compute_window_bounds(
         start=window_start,
         end=window_end,
     )
+
+
+def in_window(raw_fvg: RawFVG, window: Window) -> bool:
+    """
+    Return True if the candidate's Candle C timestamp falls within
+    the inclusive TS-001 lookback window.
+
+    Membership is determined solely by RawFVG.end_time.
+    """
+
+    return window.start <= raw_fvg.end_time <= window.end
 
 
 def select_primary_target_zone(
