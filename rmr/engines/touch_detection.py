@@ -31,7 +31,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Sequence
 
-from rmr.detectors.daily_fvg import Candle, RawFVG
+from rmr.models.candle import Candle
+from rmr.models.raw_fvg import RawFVG
 
 __all__ = [
     "TouchStatus",

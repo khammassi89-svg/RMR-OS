@@ -23,9 +23,9 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+from rmr.detectors.daily_fvg import detect_daily_fvgs
 from rmr.models.candle import Candle
 from rmr.models.raw_fvg import Direction, RawFVG
-from rmr.detectors.daily_fvg import detect_daily_fvgs
 
 BASE = datetime(2025, 1, 1, 0, 0, 0)
 
