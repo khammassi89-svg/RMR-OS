@@ -2,7 +2,7 @@
 
 **Document ID:** CONST-001
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Status:** Approved
 
@@ -16,7 +16,7 @@
 
 This Constitution defines the governing principles of RMR-OS.
 
-Every specification, Python module, detector, backtest, AI recommendation and future development must comply with this document.
+Every specification, data specification, Python module, detector, engine, orchestration component, backtest, AI recommendation and future development shall comply with this document.
 
 If any document conflicts with this Constitution, the Constitution takes precedence.
 
@@ -34,12 +34,15 @@ RMR-OS does not predict the market.
 
 RMR-OS measures market structure.
 
-Every trading decision must be:
+Every trading decision shall be:
 
 - Deterministic
 - Explainable
 - Repeatable
 - Testable
+- Auditable
+
+Identical inputs shall always produce identical outputs.
 
 ---
 
@@ -48,11 +51,12 @@ Every trading decision must be:
 The official source of truth is:
 
 1. Constitution
-2. Specifications
-3. Rule Registry
-4. Python Code
+2. Approved Specifications
+3. Shared Data Specifications
+4. Rule Registry
+5. Python Code
 
-If Python behaves differently from the specifications, the specifications are considered correct.
+If Python behaves differently from the approved specifications, the specifications are considered correct.
 
 ---
 
@@ -61,11 +65,14 @@ If Python behaves differently from the specifications, the specifications are co
 The project follows these principles:
 
 - Documentation First
-- Rule Driven Development
+- Rule-Driven Development
+- Specification Before Implementation
 - Version Controlled
 - Modular Architecture
-- Test Driven Validation
+- Single Responsibility
+- Test-Driven Validation
 - Research Before Modification
+- Deterministic Design
 
 ---
 
@@ -74,7 +81,7 @@ The project follows these principles:
 The strategy shall always follow these principles.
 
 - One Primary Target Zone
-- One Trade Per Zone
+- One Trade Per Point of Interest
 - Higher Timeframes define context
 - Lower Timeframes refine entries
 - Manipulation Clusters drive execution
@@ -82,27 +89,44 @@ The strategy shall always follow these principles.
 
 ---
 
-# 7. AI Governance
+# 7. Architectural Principles
 
-Artificial Intelligence may:
+Business rules shall remain independent.
 
-- Implement specifications
-- Generate code
-- Produce documentation
-- Analyse historical results
+Each specification owns exactly one responsibility.
 
-Artificial Intelligence may NOT:
+Business rules shall communicate only through their documented inputs and outputs.
 
-- Invent trading rules
-- Modify strategy logic
-- Override specifications
-- Change money management automatically
+Lifecycle management belongs to orchestration, not individual business rules.
+
+Business rules shall remain stateless unless explicitly specified.
 
 ---
 
-# 8. Learning Engine
+# 8. AI Governance
 
-The Learning Engine exists to analyse completed trades.
+Artificial Intelligence may:
+
+- Implement approved specifications
+- Generate code
+- Produce documentation
+- Generate tests
+- Analyse historical results
+- Recommend improvements
+
+Artificial Intelligence shall NOT:
+
+- Invent trading rules
+- Modify strategy logic
+- Override approved specifications
+- Change money management automatically
+- Modify approved specifications without owner approval
+
+---
+
+# 9. Learning Engine
+
+The Learning Engine exists only to analyse completed trades.
 
 Its purpose is:
 
@@ -111,28 +135,46 @@ Its purpose is:
 - Produce research reports
 - Recommend improvements
 
-Recommendations must always be approved by the project owner before becoming official.
+Recommendations shall never become official until approved by the project owner.
 
 ---
 
-# 9. Version Policy
+# 10. Version Policy
 
 Major Version
 
-Changes the framework.
+Changes the architecture or framework.
 
 Minor Version
 
-Adds functionality.
+Adds approved functionality without changing existing behaviour.
 
 Patch Version
 
-Fixes errors without changing behaviour.
+Fixes defects or documentation without changing approved business behaviour.
 
 ---
 
-# 10. Final Principle
+# 11. Specification Freeze
 
-Every rule inside RMR-OS must be explainable in plain English before it is implemented in Python.
+An approved specification is considered frozen once released.
+
+Any behavioural change shall:
+
+- Update the affected specification.
+- Update dependent specifications where required.
+- Be version controlled.
+- Be documented in the project changelog.
+- Preserve deterministic behaviour.
+
+---
+
+# 12. Final Principle
+
+Every rule inside RMR-OS shall be explainable in plain English before it is implemented in Python.
 
 If a rule cannot be explained, it cannot be coded.
+
+The implementation shall never become the source of truth.
+
+The specification is always the source of truth.
