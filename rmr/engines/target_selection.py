@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from rmr.detectors.daily_fvg import detect_daily_fvgs
+from rmr.engines.touch_detection import TouchDetectionEngine, TouchStatus
 from rmr.models.candle import Candle
 from rmr.models.raw_fvg import RawFVG
 
@@ -25,6 +26,19 @@ class Window:
 
     start: datetime
     end: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateDistance:
+    """
+    Internal transient pairing between a candidate FVG and its
+    nearest-boundary distance.
+
+    Exists only during TS-001 Step 5 and Step 6.
+    """
+
+    candidate: RawFVG
+    distance: float
 
 
 def detect_candidates(daily_candles: list[Candle]) -> list[RawFVG]:
@@ -81,6 +95,74 @@ def apply_exclusions(
         for candidate in candidates
         if candidate.end_time not in excluded_fvg_set
     ]
+
+
+def classify_touch(
+    touch_engine: TouchDetectionEngine,
+    raw_fvg: RawFVG,
+    daily_candles: list[Candle],
+) -> TouchStatus:
+    """
+    Delegate touch classification to TM-001.
+
+    Any exception raised by the Touch Detection Engine is
+    intentionally propagated.
+    """
+    return touch_engine.classify(
+        raw_fvg=raw_fvg,
+        candles=daily_candles,
+    )
+
+
+def remove_tested(
+    candidates: list[RawFVG],
+    daily_candles: list[Candle],
+) -> list[RawFVG]:
+    """
+    Remove every candidate classified TESTED by TM-001.
+
+    A single TouchDetectionEngine instance is reused for the
+    entire filtering pass.
+    """
+    touch_engine = TouchDetectionEngine()
+
+    return [
+        candidate
+        for candidate in candidates
+        if classify_touch(
+            touch_engine,
+            candidate,
+            daily_candles,
+        )
+        is TouchStatus.UNTESTED
+    ]
+
+
+def nearest_boundary_distance(
+    raw_fvg: RawFVG,
+    current_market_price: float,
+) -> CandidateDistance:
+    """
+    Compute the nearest-boundary distance for one candidate.
+
+    Distance is measured to the nearer of the two FVG boundaries,
+    regardless of direction.
+    """
+    lower_distance = abs(
+        current_market_price - raw_fvg.lower_boundary
+    )
+
+    upper_distance = abs(
+        current_market_price - raw_fvg.upper_boundary
+    )
+
+    return CandidateDistance(
+        candidate=raw_fvg,
+        distance=min(
+            lower_distance,
+            upper_distance,
+        ),
+    )
 
 
 def select_primary_target_zone(
