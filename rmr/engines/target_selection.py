@@ -61,17 +61,32 @@ def in_window(raw_fvg: RawFVG, window: Window) -> bool:
     """
     Return True if the candidate's Candle C timestamp falls within
     the inclusive TS-001 lookback window.
-
-    Membership is determined solely by RawFVG.end_time.
     """
-
     return window.start <= raw_fvg.end_time <= window.end
+
+
+def apply_exclusions(
+    candidates: list[RawFVG],
+    excluded_fvg_set: set[datetime],
+) -> list[RawFVG]:
+    """
+    Remove candidates whose Candle C timestamp appears in the
+    excluded FVG set.
+
+    The exclusion set is treated as opaque. Membership is determined
+    solely by RawFVG.end_time.
+    """
+    return [
+        candidate
+        for candidate in candidates
+        if candidate.end_time not in excluded_fvg_set
+    ]
 
 
 def select_primary_target_zone(
     daily_candles: list[Candle],
     current_market_price: float,
-    excluded_fvg_set,
+    excluded_fvg_set: set[datetime],
     lookback_days: int,
 ):
     """
