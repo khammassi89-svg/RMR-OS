@@ -1,117 +1,180 @@
-"""
-TS-001 Primary Target Zone Selection Engine.
+"""TM-001 Touch Detection / ENG-003 Touch Detection Engine.
 
-Implements the deterministic selection of the Primary Target Zone (PTZ)
-according to the approved TS-001 specification.
+Rule IDs implemented: TM-001 (Touch Detection).
+Engine IDs implemented: ENG-003 (Touch Detection Engine).
+
+This module classifies an existing Daily Fair Value Gap (``RawFVG``) as
+TESTED or UNTESTED. Per the RMR-OS Constitution, TM-001 and ENG-003, this
+module:
+
+- consumes a ``RawFVG`` produced by DR-001 and a chronological series of
+  Daily ``Candle`` objects;
+- performs NO detection (finding gaps is DR-001's responsibility);
+- performs NO target selection, distance calculation, lookback filtering,
+  trade execution or lifecycle management (those belong to TS-001 and later
+  engines);
+- retains no state: a ``RawFVG`` carries no touch status, so the
+  classification is only ever the return value of :meth:`classify`.
+
+Touch definition (TM-001)
+-------------------------
+A Daily FVG becomes TESTED when the wick of any completed Daily candle that
+occurs *after Candle C* touches or enters the gap. A candle close is not
+required and equality with either boundary counts as a touch. Candles A, B
+and C are never evaluated. A candle touches the gap when::
+
+    candle.high >= raw_fvg.lower_boundary
+    AND
+    candle.low  <= raw_fvg.upper_boundary
+
+Both gap boundaries are inclusive.
+
+Input requirements (TM-001 / DS-001)
+------------------------------------
+The supplied Daily series shall be in strictly chronological order with
+unique timestamps (DS-001). Candle C is located by ``RawFVG.end_time`` and
+"after Candle C" is interpreted by position within the supplied series. If
+Candle C cannot be located, the engine raises an error.
+
+The module depends only on the shared data models (standard library aside).
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
+import enum
 
-from rmr.detectors.daily_fvg import detect_daily_fvgs
-from rmr.engines.touch_detection import TouchDetectionEngine, TouchStatus
 from rmr.models.candle import Candle
 from rmr.models.raw_fvg import RawFVG
 
+__all__ = [
+    "TouchStatus",
+    "TouchDetectionError",
+    "CandleCNotFoundError",
+    "InvalidCandleSeriesError",
+    "TouchDetectionEngine",
+]
 
-@dataclass(frozen=True, slots=True)
-class Window:
+
+class TouchStatus(enum.Enum):
+    """TM-001 output classification.
+
+    TM-001 defines exactly two values: a gap is either TESTED or UNTESTED.
     """
-    Inclusive TS-001 lookback window.
 
-    Both start and end timestamps are inclusive.
+    TESTED = "TESTED"
+    UNTESTED = "UNTESTED"
+
+
+class TouchDetectionError(Exception):
+    """Base class for every error raised by the Touch Detection Engine."""
+
+
+class CandleCNotFoundError(TouchDetectionError):
+    """Raised when Candle C cannot be located using ``RawFVG.end_time``.
+
+    TM-001 Input Requirements: "If Candle C cannot be located using
+    ``RawFVG.end_time``, the engine shall raise an error."
     """
 
-    start: datetime
-    end: datetime
 
+class InvalidCandleSeriesError(TouchDetectionError):
+    """Raised when the supplied Daily series violates DS-001.
 
-def detect_candidates(daily_candles: list[Candle]) -> list[RawFVG]:
+    DS-001 requires candle timestamps to be strictly chronological and
+    unique; duplicate timestamps are invalid. Either violation is reported
+    through this error.
     """
-    Detect all Daily Fair Value Gap candidates using DR-001.
+
+
+class TouchDetectionEngine:
+    """ENG-003 engine that classifies a ``RawFVG`` as TESTED or UNTESTED.
+
+    The engine is stateless. It never mutates the supplied ``RawFVG`` or the
+    supplied candle series, and two invocations with identical inputs always
+    produce an identical result.
     """
-    return detect_daily_fvgs(daily_candles)
 
+    def classify(
+        self,
+        raw_fvg: RawFVG,
+        candles: list[Candle],
+    ) -> TouchStatus:
+        """Classify one ``RawFVG`` against the supplied Daily series.
 
-def resolve_anchor(daily_candles: list[Candle]) -> Candle:
-    """
-    Return the latest completed Daily candle.
-    """
-    return daily_candles[-1]
+        Processing order (TM-001):
 
+        1. Validate the series (DS-001: strictly chronological, unique
+           timestamps). A violation raises ``InvalidCandleSeriesError``.
+        2. Locate Candle C by ``RawFVG.end_time``. If absent, raise
+           ``CandleCNotFoundError``.
+        3. Scan every candle whose position follows Candle C. The first
+           candle that touches the gap yields ``TESTED``; if none touches,
+           the result is ``UNTESTED``.
 
-def compute_window_bounds(
-    anchor: Candle,
-    lookback_days: int,
-) -> Window:
-    """
-    Compute the inclusive TS-001 lookback window.
-    """
-    window_end = anchor.timestamp
-    window_start = window_end - timedelta(days=lookback_days - 1)
+        Args:
+            raw_fvg: The Daily Fair Value Gap to classify.
+            candles: The Daily candle series, in chronological order.
 
-    return Window(
-        start=window_start,
-        end=window_end,
-    )
+        Returns:
+            ``TouchStatus.TESTED`` or ``TouchStatus.UNTESTED``.
 
+        Raises:
+            InvalidCandleSeriesError: The series is not strictly
+                chronological or contains duplicate timestamps.
+            CandleCNotFoundError: Candle C could not be located.
+        """
+        self._validate_series(candles)
 
-def in_window(raw_fvg: RawFVG, window: Window) -> bool:
-    """
-    Return True if the candidate's Candle C timestamp falls within
-    the inclusive TS-001 lookback window.
-    """
-    return window.start <= raw_fvg.end_time <= window.end
+        candle_c_index = self._locate_candle_c(raw_fvg, candles)
 
+        # "After Candle C" is every candle whose position follows Candle C.
+        # Candles A, B and C are never evaluated.
+        for candle in candles[candle_c_index + 1:]:
+            if self.is_touch(candle, raw_fvg):
+                # The first touch permanently changes the status to TESTED.
+                return TouchStatus.TESTED
 
-def apply_exclusions(
-    candidates: list[RawFVG],
-    excluded_fvg_set: set[datetime],
-) -> list[RawFVG]:
-    """
-    Remove candidates whose Candle C timestamp appears in the
-    excluded FVG set.
+        return TouchStatus.UNTESTED
 
-    The exclusion set is treated as opaque. Membership is determined
-    solely by RawFVG.end_time.
-    """
-    return [
-        candidate
-        for candidate in candidates
-        if candidate.end_time not in excluded_fvg_set
-    ]
+    def is_touch(self, candle: Candle, raw_fvg: RawFVG) -> bool:
+        """Return whether a single candle touches the gap (TM-001 rule).
 
+        Both boundaries are inclusive: equality with either boundary counts
+        as a touch. Direction is never consulted.
+        """
+        return (
+            candle.high >= raw_fvg.lower_boundary
+            and candle.low <= raw_fvg.upper_boundary
+        )
 
-def classify_touch(
-    raw_fvg: RawFVG,
-    daily_candles: list[Candle],
-) -> TouchStatus:
-    """
-    Classify one candidate using ENG-003 (Touch Detection Engine).
+    @staticmethod
+    def _validate_series(candles: list[Candle]) -> None:
+        """Enforce the DS-001 series contract.
 
-    This helper delegates all touch-detection logic to TM-001 / ENG-003.
-    It performs no touch calculations itself.
+        Timestamps must be strictly increasing. A strictly increasing check
+        rejects both non-chronological ordering and duplicate timestamps in
+        a single pass.
+        """
+        for previous, current in zip(candles, candles[1:]):
+            if current.timestamp <= previous.timestamp:
+                raise InvalidCandleSeriesError(
+                    "Daily candle timestamps must be strictly chronological "
+                    "and unique; "
+                    f"{current.timestamp} does not follow "
+                    f"{previous.timestamp}."
+                )
 
-    Any exception raised by the Touch Detection Engine is intentionally
-    propagated to the caller.
-    """
-    touch_engine = TouchDetectionEngine()
+    @staticmethod
+    def _locate_candle_c(raw_fvg: RawFVG, candles: list[Candle]) -> int:
+        """Return the position of Candle C, identified by ``end_time``.
 
-    return touch_engine.classify(
-        raw_fvg=raw_fvg,
-        candles=daily_candles,
-    )
+        DS-001 guarantees unique timestamps, so at most one candle matches.
+        """
+        for index, candle in enumerate(candles):
+            if candle.timestamp == raw_fvg.end_time:
+                return index
 
-
-def select_primary_target_zone(
-    daily_candles: list[Candle],
-    current_market_price: float,
-    excluded_fvg_set: set[datetime],
-    lookback_days: int,
-):
-    """
-    Select the Primary Target Zone according to TS-001.
-    """
-    raise NotImplementedError
+        raise CandleCNotFoundError(
+            f"Candle C with end_time {raw_fvg.end_time} was not found in the "
+            "supplied Daily candle series."
+        )
